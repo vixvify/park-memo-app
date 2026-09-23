@@ -1,43 +1,61 @@
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import NearMeRoundedIcon from "@mui/icons-material/NearMeRounded";
-import Link from "next/link";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export function ParkingHeader({
-  backHref,
-  backLabel,
-}: {
-  backHref?: string;
-  backLabel?: string;
-}) {
+import { colors, radii, spacing } from "@/theme";
+
+export function ParkingHeader({ back = false }: { back?: boolean }) {
   return (
-    <header className="relative z-10 border-b border-[#dfe7dd] bg-white/85 backdrop-blur">
-      <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link
-          aria-label="FindMyCar หน้าแรก"
-          className="flex items-center gap-2 font-semibold tracking-tight text-[#173c31]"
-          href="/"
+    <View style={styles.row}>
+      {back ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="ย้อนกลับ"
+          onPress={() => router.back()}
+          style={styles.back}
         >
-          <span className="flex size-9 items-center justify-center rounded-xl bg-[#173f33] text-white">
-            <NearMeRoundedIcon fontSize="small" />
-          </span>
-          <span className="text-lg">
-            find<span className="text-[#6c9b76]">my</span>car
-          </span>
-        </Link>
-        {backHref ? (
-          <Link
-            className="inline-flex items-center gap-1 text-sm font-medium text-[#42664f] hover:text-[#173f33]"
-            href={backHref}
-          >
-            <ArrowBackRoundedIcon fontSize="small" />
-            {backLabel ?? "กลับ"}
-          </Link>
-        ) : (
-          <span className="hidden text-xs tracking-wide text-[#83978b] sm:block">
-            จำจุดจอดรถของคุณ
-          </span>
-        )}
-      </div>
-    </header>
+          <MaterialIcons name="arrow-back" size={22} color={colors.primary} />
+        </Pressable>
+      ) : null}
+      <View style={styles.brandIcon}>
+        <MaterialIcons name="directions-car" size={21} color="#fff" />
+      </View>
+      <Text style={styles.brand}>
+        find<Text style={styles.brandAccent}>my</Text>car
+      </Text>
+      <Text style={styles.tagline}>จำจุดจอด แล้วกลับมาง่าย ๆ</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    minHeight: 48,
+    marginBottom: spacing.xl,
+  },
+  back: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radii.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.text,
+  },
+  brand: { color: colors.text, fontFamily: "Prompt_600SemiBold", fontSize: 18 },
+  brandAccent: { color: "#6c9b76" },
+  tagline: {
+    marginLeft: "auto",
+    color: colors.textSoft,
+    fontFamily: "Prompt_400Regular",
+    fontSize: 11,
+  },
+});

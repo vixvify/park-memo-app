@@ -2,6 +2,8 @@
 
 # Next.js Fullstack Development Skill
 
+> **Project scope override:** This repository is a frontend-only parking memo app. Do not add a backend, database, Prisma, Better Auth, API routes, repositories, or server-side authentication unless the user explicitly requests them. Keep shared parking state in the client store; use browser storage when it must survive a reload. Apply the frontend guidance below; backend-specific guidance is a general template and does not apply to this repository.
+
 ## Role
 
 Act as a senior fullstack Next.js engineer.

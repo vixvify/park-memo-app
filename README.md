@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Find My Car
 
-## Getting Started
+Native Android and iOS app for saving the latest parking spot and finding the way back. Parking details are stored locally in SQLite. The app uses Expo Router, foreground device location, and Mapbox for the map and walking route.
 
-First, run the development server:
+## Requirements
+
+- Node.js 22 and npm
+- Android Studio and an Android emulator/device for local Android builds
+- macOS with Xcode for local iOS builds, or EAS Build for cloud iOS builds
+- Mapbox public access token for maps and Directions API
+- Mapbox secret `downloads:read` token for native development builds
+
+## Configure
+
+Copy `.env.example` to `.env` and set:
+
+- `EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN` to a least-privilege `pk.*` token
+- `MAPBOX_DOWNLOADS_TOKEN` to a secret token with `downloads:read` scope
+
+For EAS builds, add these values as project environment variables/secrets. Never commit tokens.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mapbox includes native code, so run the app in a development build instead of Expo Go:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run android
+npm run ios
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Verify
 
-## Learn More
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run check:expo
+npm run export:android
+npm run export:ios
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The app keeps one parking spot on the device. Editing its text preserves the saved location; use “ย้ายหมุดมาที่นี่” to set a new parking coordinate. Mapping and route calculation need internet access. Directions cover outdoor walking only and do not model mall floors or indoor corridors.
