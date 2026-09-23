@@ -40,6 +40,10 @@ function getAuthUrl() {
 }
 
 export const config = {
+  get databaseUrl() {
+    return process.env.DATABASE_URL ?? "";
+  },
+
   get googleMapsApiKey() {
     return process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   },
