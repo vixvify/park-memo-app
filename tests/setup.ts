@@ -1,5 +1,9 @@
-import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+jest.mock("@expo/vector-icons/MaterialIcons", () => {
+  const React = jest.requireActual<typeof import("react")>("react");
+  const { Text } = jest.requireActual<typeof import("react-native")>("react-native");
 
-afterEach(() => cleanup());
+  return {
+    __esModule: true,
+    default: ({ name }: { name: string }) => React.createElement(Text, null, name),
+  };
+});

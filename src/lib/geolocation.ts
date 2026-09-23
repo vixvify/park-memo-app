@@ -1,20 +1,18 @@
-import type { Coordinates } from "@/type/domain/parking";
+import * as Location from "expo-location";
 
-export function getCurrentPosition(): Promise<Coordinates> {
-  if (typeof navigator === "undefined" || !navigator.geolocation) {
-    return Promise.reject(new Error("Geolocation is unavailable"));
-  }
+import type { Coordinates } from "@/core/domain/parking";
 
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) =>
-        resolve({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-          accuracy: coords.accuracy,
-        }),
-      reject,
-      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 0 },
-    );
+export async function getCurrentPosition(): Promise<Coordinates> {
+  const permission = await Location.requestForegroundPermissionsAsync();
+  if (!permission.granted)
+    throw new Error("Location permission was not granted");
+
+  const position = await Location.getCurrentPositionAsync({
+    accuracy: Location.Accuracy.High,
   });
+  return {
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+    accuracy: position.coords.accuracy ?? 0,
+  };
 }
