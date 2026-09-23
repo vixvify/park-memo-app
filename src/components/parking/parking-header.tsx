@@ -2,6 +2,8 @@ import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import NearMeRoundedIcon from "@mui/icons-material/NearMeRounded";
 import Link from "next/link";
 
+import { ButtonLink } from "@/components/ui/button";
+
 export function ParkingHeader({
   backHref,
   backLabel,
@@ -25,13 +27,14 @@ export function ParkingHeader({
           </span>
         </Link>
         {backHref ? (
-          <Link
-            className="inline-flex items-center gap-1 text-sm font-medium text-[#42664f] hover:text-[#173f33]"
+          <ButtonLink
+            className="rounded-xl px-2 py-1 text-sm font-medium text-[#42664f] hover:text-[#173f33]"
+            variant="quiet"
             href={backHref}
           >
             <ArrowBackRoundedIcon fontSize="small" />
             {backLabel ?? "กลับ"}
-          </Link>
+          </ButtonLink>
         ) : (
           <span className="hidden text-xs tracking-wide text-[#83978b] sm:block">
             จำจุดจอดรถของคุณ

@@ -4,7 +4,7 @@ import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import { useEffect, useRef, useState } from "react";
 
 import { config } from "@/config";
-import type { Coordinates } from "@/core/domain/parking";
+import type { Coordinates } from "@/type/domain/parking";
 import { renderWalkingMap, type WalkingMapResult } from "@/lib/google-maps";
 
 type MapStatus =
@@ -36,11 +36,7 @@ export function GoogleWalkingMap({
   const [route, setRoute] = useState<WalkingMapResult["summary"]>(null);
 
   useEffect(() => {
-    if (
-      !config.googleMapsApiKey ||
-      !currentLocation ||
-      !mapElement.current
-    )
+    if (!config.googleMapsApiKey || !currentLocation || !mapElement.current)
       return;
     let active = true;
     let dispose: (() => void) | undefined;

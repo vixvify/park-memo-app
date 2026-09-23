@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-This project is a fullstack web application built entirely with Next.js and TypeScript.
+**Project scope override:** FindMyCar is a frontend-only parking memo app built with Next.js and TypeScript. Do not add a backend, database, Prisma, Better Auth, API routes, repositories, or server-side auth unless the user explicitly requests them. Keep shared parking state in the client store; use browser storage when it must survive a reload. The fullstack examples and backend-specific sections below are general templates and do not apply where they conflict with this scope.
+
+This project uses Next.js and TypeScript.
 
 The project follows this structure:
 

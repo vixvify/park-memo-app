@@ -5,20 +5,22 @@ import DirectionsCarOutlinedIcon from "@mui/icons-material/DirectionsCarOutlined
 import DirectionsWalkRoundedIcon from "@mui/icons-material/DirectionsWalkRounded";
 import GpsFixedRoundedIcon from "@mui/icons-material/GpsFixedRounded";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { GoogleWalkingMap } from "@/components/parking/google-walking-map.client";
 import { ParkingDetailCard } from "@/components/parking/parking-detail-card";
 import { ParkingHeader } from "@/components/parking/parking-header";
-import type { Coordinates } from "@/core/domain/parking";
+import { Button, ButtonLink } from "@/components/ui/button";
+import type { Coordinates } from "@/type/domain/parking";
 import { getCurrentPosition } from "@/lib/geolocation";
 import { useParkingStore } from "@/store/parking.store";
+import { useParkingStoreHydration } from "@/store/use-parking-store-hydration";
 import { formatAccuracy, formatSavedAt } from "@/utils/parking";
 
 type LocationState = "locating" | "ready" | "unavailable";
 
 export default function ParkingPage() {
+  const hasHydrated = useParkingStoreHydration();
   const spot = useParkingStore((state) => state.spot);
   const clearSpot = useParkingStore((state) => state.clearSpot);
   const [currentLocation, setCurrentLocation] = useState<Coordinates | null>(
@@ -55,6 +57,17 @@ export default function ParkingPage() {
     };
   }, [spot?.coordinates]);
 
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen bg-[#f6f8f2]">
+        <ParkingHeader />
+        <main className="mx-auto flex min-h-[70vh] max-w-xl items-center justify-center px-5 text-center text-[#718477]">
+          <p role="status">กำลังโหลดจุดจอดที่บันทึกไว้...</p>
+        </main>
+      </div>
+    );
+  }
+
   if (!spot) {
     return (
       <div className="min-h-screen bg-[#f6f8f2]">
@@ -67,12 +80,9 @@ export default function ParkingPage() {
             ยังไม่มีจุดจอด
           </h1>
           <p className="mt-3 text-[#718477]">บันทึกจุดจอดรถก่อน</p>
-          <Link
-            className="mt-7 rounded-xl bg-[#153f33] px-6 py-3 font-medium text-white"
-            href="/"
-          >
+          <ButtonLink className="mt-7 rounded-xl px-6 py-3 font-medium" href="/">
             บันทึกจุดจอด
-          </Link>
+          </ButtonLink>
         </main>
       </div>
     );
@@ -89,12 +99,13 @@ export default function ParkingPage() {
             </p>
             <h1 className="text-3xl font-semibold sm:text-4xl">กลับไปที่รถ</h1>
           </div>
-          <Link
-            className="rounded-xl border border-[#cadbc9] bg-white px-4 py-2 text-sm font-medium text-[#315941] hover:bg-[#edf4e9]"
+          <ButtonLink
+            className="rounded-xl px-4 py-2 text-sm font-medium"
+            variant="secondary"
             href="/"
           >
             แก้ไขข้อมูล
-          </Link>
+          </ButtonLink>
         </div>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)] lg:items-start">
           <section
@@ -129,15 +140,16 @@ export default function ParkingPage() {
                       ? `ตำแหน่งปัจจุบัน ${formatAccuracy(currentLocation.accuracy)}`
                       : "ไม่พบตำแหน่งปัจจุบัน"}
                 </span>
-                <button
-                  className="inline-flex items-center gap-1 font-medium text-[#245b3a] disabled:opacity-50"
+                <Button
+                  className="rounded-lg px-2 py-1 text-sm font-medium disabled:opacity-50"
                   disabled={locationState === "locating"}
                   onClick={() => void refreshLocation()}
                   type="button"
+                  variant="quiet"
                 >
                   <RefreshRoundedIcon fontSize="small" />
                   อัปเดตตำแหน่ง
-                </button>
+                </Button>
               </div>
             )}
           </section>
@@ -152,14 +164,15 @@ export default function ParkingPage() {
                 </div>
               )}
             </div>
-            <button
-              className="inline-flex items-center gap-1 px-2 py-2 text-sm text-[#977572] hover:text-[#8b3d35]"
+            <Button
+              className="rounded-lg px-2 py-2 text-sm"
               onClick={clearSpot}
               type="button"
+              variant="danger"
             >
               <DeleteOutlineRoundedIcon fontSize="small" />
               ล้างจุดจอด
-            </button>
+            </Button>
           </aside>
         </div>
       </main>

@@ -1,4 +1,4 @@
-import type { ParkingSpot } from "@/core/domain/parking";
+import type { ParkingSpot } from "@/type/domain/parking";
 
 export function ParkingDetailCard({ spot }: { spot: ParkingSpot }) {
   const items = [
@@ -19,7 +19,7 @@ export function ParkingDetailCard({ spot }: { spot: ParkingSpot }) {
           {items.map(({ label, value }) => (
             <div className="rounded-xl bg-[#f1f5ee] p-3" key={label}>
               <dt className="text-xs text-[#7b8d83]">{label}</dt>
-              <dd className="mt-1 break-words text-lg font-semibold text-[#204738]">
+              <dd className="mt-1 wrap-break-word text-lg font-semibold text-[#204738]">
                 {value}
               </dd>
             </div>

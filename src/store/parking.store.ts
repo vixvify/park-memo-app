@@ -1,7 +1,8 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { ParkingSpot } from "@/core/domain/parking";
-import type { ParkingInput } from "@/core/schema/parking.schema";
+import type { ParkingSpot } from "@/type/domain/parking";
+import type { ParkingInput } from "@/type/schema/parking.schema";
 import { getCurrentPosition } from "@/lib/geolocation";
 
 type ParkingState = {
@@ -10,11 +11,30 @@ type ParkingState = {
   clearSpot: () => void;
 };
 
-export const useParkingStore = create<ParkingState>((set) => ({
-  spot: null,
-  saveSpot: async (input) => {
-    const coordinates = await getCurrentPosition().catch(() => null);
-    set({ spot: { ...input, coordinates, savedAt: new Date().toISOString() } });
-  },
-  clearSpot: () => set({ spot: null }),
-}));
+const parkingStorage = createJSONStorage<ParkingState>(() => {
+  if (typeof window !== "undefined") return window.localStorage;
+
+  return {
+    getItem: () => null,
+    setItem: () => undefined,
+    removeItem: () => undefined,
+  };
+});
+
+export const useParkingStore = create<ParkingState>()(
+  persist(
+    (set) => ({
+      spot: null,
+      saveSpot: async (input) => {
+        const coordinates = await getCurrentPosition().catch(() => null);
+        set({ spot: { ...input, coordinates, savedAt: new Date().toISOString() } });
+      },
+      clearSpot: () => set({ spot: null }),
+    }),
+    {
+      name: "findmycar-parking",
+      storage: parkingStorage,
+      skipHydration: true,
+    },
+  ),
+);

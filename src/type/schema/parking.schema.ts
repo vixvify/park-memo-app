@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ParkingDetails } from "@/core/domain/parking";
+import type { ParkingDetails } from "../domain/parking";
 
 export const ParkingSchema = z.object({
   placeName: z.string(),

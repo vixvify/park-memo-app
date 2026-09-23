@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ParkingDetailCard } from "@/components/parking/parking-detail-card";
-import type { ParkingSpot } from "@/core/domain/parking";
+import type { ParkingSpot } from "@/type/domain/parking";
 
 const spot: ParkingSpot = {
   placeName: "เซ็นทรัล",

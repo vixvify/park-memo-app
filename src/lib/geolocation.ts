@@ -1,4 +1,4 @@
-import type { Coordinates } from "@/core/domain/parking";
+import type { Coordinates } from "@/type/domain/parking";
 
 export function getCurrentPosition(): Promise<Coordinates> {
   if (typeof navigator === "undefined" || !navigator.geolocation) {

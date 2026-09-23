@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import type { Coordinates } from "@/core/domain/parking";
+import type { Coordinates } from "@/type/domain/parking";
 import { formatDistance, formatDuration } from "@/utils/parking";
 
 export type GoogleLatLng = { lat: number; lng: number };

@@ -10,6 +10,7 @@ const input = { placeName: "ห้าง", floor: "B1", zone: "A", parkingNumber
 describe("parking store", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    useParkingStore.persist.clearStorage();
     useParkingStore.setState({ spot: null });
   });
 
@@ -27,5 +28,22 @@ describe("parking store", () => {
     expect(useParkingStore.getState().spot).toMatchObject({ ...input, coordinates: null });
     useParkingStore.getState().clearSpot();
     expect(useParkingStore.getState().spot).toBeNull();
+  });
+
+  it("restores the saved parking spot from browser storage", async () => {
+    vi.mocked(getCurrentPosition).mockResolvedValue({
+      latitude: 13.7,
+      longitude: 100.5,
+      accuracy: 9,
+    });
+    await useParkingStore.getState().saveSpot(input);
+    const savedState = localStorage.getItem("findmycar-parking");
+
+    expect(savedState).not.toBeNull();
+    useParkingStore.setState({ spot: null });
+    localStorage.setItem("findmycar-parking", savedState!);
+    await useParkingStore.persist.rehydrate();
+
+    expect(useParkingStore.getState().spot?.placeName).toBe("ห้าง");
   });
 });

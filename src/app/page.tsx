@@ -8,10 +8,12 @@ import { useRouter } from "next/navigation";
 
 import { ParkingForm } from "@/components/parking/parking-form.client";
 import { ParkingHeader } from "@/components/parking/parking-header";
-import type { ParkingInput } from "@/core/schema/parking.schema";
+import type { ParkingInput } from "@/type/schema/parking.schema";
 import { useParkingStore } from "@/store/parking.store";
+import { useParkingStoreHydration } from "@/store/use-parking-store-hydration";
 
 export default function Home() {
+  const hasHydrated = useParkingStoreHydration();
   const spot = useParkingStore((state) => state.spot);
   const saveSpot = useParkingStore((state) => state.saveSpot);
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function Home() {
           <p className="max-w-md text-base leading-7 text-[#6e8275]">
             บันทึกจุดจอดและตำแหน่ง GPS ไว้ แล้วกลับมาหารถได้ง่ายขึ้น
           </p>
-          {spot && (
+          {hasHydrated && spot && (
             <Link
               className="flex max-w-md items-center gap-4 rounded-2xl border border-[#d7e6d5] bg-white p-4 shadow-[0_8px_30px_rgba(24,66,43,.05)] transition hover:border-[#9fbea0]"
               href="/parking"
@@ -64,10 +66,16 @@ export default function Home() {
           aria-label="กรอกข้อมูลจุดจอดรถ"
           className="rounded-3xl border border-[#e2e9df] bg-white p-6 shadow-[0_20px_65px_rgba(23,60,49,.08)] sm:p-9"
         >
-          <ParkingForm
-            initialValues={spot ?? undefined}
-            onSubmit={handleSave}
-          />
+          {hasHydrated ? (
+            <ParkingForm
+              initialValues={spot ?? undefined}
+              onSubmit={handleSave}
+            />
+          ) : (
+            <p className="py-8 text-center text-sm text-[#718477]" role="status">
+              กำลังโหลดจุดจอดที่บันทึกไว้...
+            </p>
+          )}
           {spot && (
             <p className="mt-4 text-center text-xs text-[#8a9b8f]">
               บันทึกครั้งนี้จะแทนจุดจอดล่าสุด

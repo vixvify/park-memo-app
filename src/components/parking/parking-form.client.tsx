@@ -8,7 +8,8 @@ import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { ParkingSchema, type ParkingInput } from "@/core/schema/parking.schema";
+import { Button } from "@/components/ui/button";
+import { ParkingSchema, ParkingInput } from "@/type/schema/parking.schema";
 import { ParkingField, ParkingNoteField } from "./parking-field";
 
 const emptyInput: ParkingInput = {
@@ -28,7 +29,7 @@ export function ParkingForm({ initialValues, onSubmit }: ParkingFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, isValid },
   } = useForm<ParkingInput>({
     resolver: zodResolver(ParkingSchema),
     defaultValues: initialValues ?? emptyInput,
@@ -83,14 +84,15 @@ export function ParkingForm({ initialValues, onSubmit }: ParkingFormProps) {
           />
         </div>
       </div>
-      <button
-        disabled={isSubmitting}
-        className="flex w-full items-center justify-between rounded-2xl bg-[#153f33] px-6 py-4 text-base font-semibold text-white shadow-[0_12px_24px_rgba(21,63,51,.18)] transition hover:bg-[#235443] disabled:opacity-60"
+      <Button
+        disabled={isSubmitting || !isValid}
+        alignment="between"
+        className="w-full rounded-2xl px-6 py-4 text-base font-semibold shadow-[0_12px_24px_rgba(21,63,51,.18)]"
         type="submit"
       >
         {isSubmitting ? "กำลังบันทึกตำแหน่ง..." : "บันทึกจุดจอด"}
         <ArrowForwardRoundedIcon />
-      </button>
+      </Button>
     </form>
   );
 }

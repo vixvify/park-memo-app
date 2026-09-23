@@ -17,6 +17,7 @@ vi.mock("@/components/parking/google-walking-map.client", () => ({
 describe("parking pages", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    useParkingStore.persist.clearStorage();
     useParkingStore.setState({ spot: null });
   });
 
