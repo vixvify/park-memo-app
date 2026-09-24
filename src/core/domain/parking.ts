@@ -17,7 +17,9 @@ export type ParkingSpot = ParkingDetails & {
   savedAt: string;
 };
 
-export type WalkingRoute = {
+export type RouteMode = "walking" | "driving";
+
+export type NavigationRoute = {
   coordinates: [number, number][];
   distanceMeters: number;
   durationSeconds: number;

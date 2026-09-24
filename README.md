@@ -1,6 +1,6 @@
 # Find My Car
 
-Native Android and iOS app for saving the latest parking spot and finding the way back. Parking details are stored locally in SQLite. The app uses Expo Router, foreground device location, and Mapbox for the map and walking route.
+Native Android and iOS app for saving the latest parking spot and finding the way back. Parking details are stored locally in SQLite. The app uses Expo Router, foreground device location, and Mapbox for the map and walking or driving routes.
 
 ## Requirements
 
@@ -44,4 +44,4 @@ npm run export:android
 npm run export:ios
 ```
 
-The app keeps one parking spot on the device. Editing its text preserves the saved location; use “ย้ายหมุดมาที่นี่” to set a new parking coordinate. Mapping and route calculation need internet access. Directions cover outdoor walking only and do not model mall floors or indoor corridors.
+The app keeps one parking spot on the device. Editing its text preserves the saved location; use “ย้ายหมุดมาที่นี่” to set a new parking coordinate. Mapping and route calculation need internet access. Choose walking or driving when starting in-app navigation. Routes do not model mall floors or indoor corridors, and there are no turn-by-turn instructions.
