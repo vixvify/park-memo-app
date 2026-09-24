@@ -17,8 +17,7 @@ describe("ParkingDetailCard", () => {
   it("shows the useful parking details", async () => {
     const screen = await render(<ParkingDetailCard spot={spot} />);
     expect(screen.getByText("เซ็นทรัล")).toBeTruthy();
-    expect(screen.getByText("B2")).toBeTruthy();
-    expect(screen.getByText("C-128")).toBeTruthy();
+    expect(screen.getByText("ชั้น B2 · โซน C · หมายเลข C-128")).toBeTruthy();
     expect(screen.getByText("ใกล้ลิฟต์แก้ว")).toBeTruthy();
   });
 

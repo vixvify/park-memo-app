@@ -12,7 +12,8 @@ const config: ExpoConfig = {
     supportsTablet: true,
     bundleIdentifier: "com.vixvify.findmycar",
     infoPlist: {
-      NSLocationWhenInUseUsageDescription: "ใช้ตำแหน่งเพื่อบันทึกและพากลับไปยังจุดจอดรถ",
+      NSLocationWhenInUseUsageDescription:
+        "ใช้ตำแหน่งเพื่อบันทึกและพากลับไปยังจุดจอดรถ",
     },
   },
   android: {
@@ -21,9 +22,21 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     "expo-sqlite",
-    ["expo-location", { locationWhenInUsePermission: "ใช้ตำแหน่งเพื่อบันทึกและพากลับไปยังจุดจอดรถ" }],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "ใช้ตำแหน่งเพื่อบันทึกและพากลับไปยังจุดจอดรถ",
+      },
+    ],
     ["expo-splash-screen", { backgroundColor: "#f6f8f2" }],
-    ["@rnmapbox/maps", { RNMapboxMapsDownloadToken: process.env.MAPBOX_DOWNLOADS_TOKEN || undefined }],
+    [
+      "@rnmapbox/maps",
+      {
+        RNMapboxMapsDownloadToken:
+          process.env.MAPBOX_DOWNLOADS_TOKEN || undefined,
+      },
+    ],
   ],
   experiments: { typedRoutes: true },
 };

@@ -8,26 +8,18 @@ export function ParkingDetailCard({ spot }: { spot: ParkingSpot }) {
     { label: "โซน", value: spot.zone },
     { label: "หมายเลข", value: spot.parkingNumber },
   ].filter((item) => item.value.trim());
+  const summary = items
+    .map((item) => `${item.label} ${item.value}`)
+    .join(" · ");
+
   return (
     <View style={styles.card}>
       <Text style={styles.place}>{spot.placeName || "จุดจอดของฉัน"}</Text>
-      {items.length ? (
-        <View style={styles.items}>
-          {items.map((item) => (
-            <View key={item.label} style={styles.item}>
-              <Text style={styles.itemLabel}>{item.label}</Text>
-              <Text style={styles.itemValue} numberOfLines={1}>
-                {item.value}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
+      {summary ? <Text style={styles.summary}>{summary}</Text> : null}
       {spot.note.trim() ? (
-        <View style={styles.note}>
-          <Text style={styles.itemLabel}>จุดสังเกต</Text>
-          <Text style={styles.noteText}>{spot.note}</Text>
-        </View>
+        <Text style={styles.note} numberOfLines={1}>
+          {spot.note}
+        </Text>
       ) : null}
     </View>
   );
@@ -35,39 +27,18 @@ export function ParkingDetailCard({ spot }: { spot: ParkingSpot }) {
 
 const styles = StyleSheet.create({
   card: {
-    padding: spacing.lg,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: "#e2e9df",
-    gap: spacing.md,
-  },
-  place: { color: colors.text, fontFamily: "Prompt_600SemiBold", fontSize: 19 },
-  items: { flexDirection: "row", gap: spacing.sm },
-  item: {
-    flex: 1,
     padding: spacing.md,
-    borderRadius: radii.sm,
-    backgroundColor: colors.surfaceSoft,
+    borderRadius: radii.md,
+    backgroundColor: colors.surface,
+    gap: spacing.xs,
   },
-  itemLabel: {
+  place: { color: colors.text, fontFamily: "Prompt_600SemiBold", fontSize: 18 },
+  summary: {
     color: colors.textMuted,
     fontFamily: "Prompt_400Regular",
-    fontSize: 11,
-  },
-  itemValue: {
-    marginTop: 2,
-    color: "#204738",
-    fontFamily: "Prompt_600SemiBold",
-    fontSize: 16,
+    fontSize: 13,
   },
   note: {
-    borderTopWidth: 1,
-    borderTopColor: "#e9eee7",
-    paddingTop: spacing.md,
-  },
-  noteText: {
-    marginTop: 2,
     color: "#365649",
     fontFamily: "Prompt_400Regular",
     fontSize: 13,

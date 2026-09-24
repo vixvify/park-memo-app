@@ -3,8 +3,12 @@ import { StyleSheet, Text, View } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-import type { Coordinates, WalkingRoute } from "@/core/domain/parking";
-import { getWalkingRoute } from "@/lib/mapbox-directions";
+import type {
+  Coordinates,
+  NavigationRoute,
+  RouteMode,
+} from "@/core/domain/parking";
+import { getNavigationRoute } from "@/lib/mapbox-directions";
 import { env } from "@/config/env";
 import { formatDistance, formatDuration } from "@/utils/parking";
 import { colors, radii, spacing } from "@/theme";
@@ -13,18 +17,22 @@ Mapbox.setAccessToken(env.mapboxAccessToken);
 
 export function ParkingMap({
   currentLocation,
+  isNavigating,
   parkingLocation,
+  routeMode,
 }: {
   currentLocation: Coordinates | null;
+  isNavigating: boolean;
   parkingLocation: Coordinates;
+  routeMode: RouteMode;
 }) {
   const [routeResult, setRouteResult] = useState<{
     key: string;
-    route: WalkingRoute | null;
+    route: NavigationRoute | null;
     error: string | null;
   } | null>(null);
   const routeKey = currentLocation
-    ? `${currentLocation.latitude},${currentLocation.longitude}:${parkingLocation.latitude},${parkingLocation.longitude}`
+    ? `${routeMode}:${currentLocation.latitude},${currentLocation.longitude}:${parkingLocation.latitude},${parkingLocation.longitude}`
     : "";
   const route = routeResult?.key === routeKey ? routeResult.route : null;
   const routeError = routeResult?.key === routeKey ? routeResult.error : null;
@@ -69,11 +77,12 @@ export function ParkingMap({
   );
   useEffect(() => {
     let active = true;
-    if (!currentLocation)
+    if (!isNavigating || !currentLocation) {
       return () => {
         active = false;
       };
-    void getWalkingRoute(currentLocation, parkingLocation)
+    }
+    void getNavigationRoute(currentLocation, parkingLocation, routeMode)
       .then((nextRoute) => {
         if (active) setRouteResult({ key: routeKey, route: nextRoute, error: null });
       })
@@ -91,7 +100,7 @@ export function ParkingMap({
     return () => {
       active = false;
     };
-  }, [currentLocation, parkingLocation, routeKey]);
+  }, [currentLocation, isNavigating, parkingLocation, routeKey, routeMode]);
 
   return (
     <View style={styles.container}>
@@ -103,7 +112,9 @@ export function ParkingMap({
           compassEnabled
         >
           <Mapbox.Camera
-            bounds={bounds}
+            bounds={isNavigating ? undefined : bounds}
+            followUserLocation={isNavigating}
+            followZoomLevel={17}
             defaultSettings={{
               centerCoordinate: [
                 parkingLocation.longitude,
@@ -121,10 +132,10 @@ export function ParkingMap({
             </View>
           </Mapbox.PointAnnotation>
           {currentLocation ? <Mapbox.UserLocation visible /> : null}
-          {shape ? (
-            <Mapbox.ShapeSource id="walking-route" shape={shape}>
+          {isNavigating && shape ? (
+            <Mapbox.ShapeSource id="navigation-route" shape={shape}>
               <Mapbox.LineLayer
-                id="walking-route-line"
+                id="navigation-route-line"
                 style={{
                   lineColor: "#427ade",
                   lineWidth: 5,
@@ -143,16 +154,18 @@ export function ParkingMap({
       )}
       <View style={styles.routeStatus}>
         <MaterialIcons
-          name="directions-walk"
+          name={routeMode === "walking" ? "directions-walk" : "directions-car"}
           size={19}
           color={colors.primary}
         />
         <Text style={styles.statusText}>
-          {route
+          {!isNavigating
+            ? "เริ่มนำทางเพื่อดูเส้นทาง"
+            : route
             ? `${formatDistance(route.distanceMeters)} · ${formatDuration(route.durationSeconds)}`
             : (routeError ??
               (currentLocation
-                ? "กำลังหาเส้นทางเดิน"
+                ? "กำลังคำนวณเส้นทาง"
                 : "อัปเดตตำแหน่งเพื่อดูเส้นทาง"))}
         </Text>
       </View>
@@ -165,12 +178,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: radii.lg,
     backgroundColor: "#e9efe8",
-    borderWidth: 1,
-    borderColor: "#e2e9df",
   },
-  map: { height: 320 },
+  map: { height: 300 },
   mapUnavailable: {
-    height: 280,
+    height: 300,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.sm,
@@ -191,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   routeStatus: {
-    minHeight: 44,
+    minHeight: 40,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,

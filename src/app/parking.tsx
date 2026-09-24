@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
@@ -7,12 +7,21 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ParkingDetailCard } from "@/components/parking/parking-detail-card";
 import { ParkingHeader } from "@/components/parking/parking-header";
 import { ParkingMap } from "@/components/parking/parking-map";
+import { NavigationControl } from "@/components/parking/navigation-control";
+import { RouteModeSelector } from "@/components/parking/route-mode-selector";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
-import type { Coordinates, ParkingSpot } from "@/core/domain/parking";
+import type {
+  Coordinates,
+  ParkingSpot,
+  RouteMode,
+} from "@/core/domain/parking";
 import { createParkingService } from "@/core/service/parking.service";
 import { createSqliteParkingRepository } from "@/infrastructure/repositories/sqlite-parking.repository";
-import { getCurrentPosition } from "@/lib/geolocation";
+import {
+  getCurrentPosition,
+  watchCurrentPosition,
+} from "@/lib/geolocation";
 import { formatAccuracy, formatSavedAt } from "@/utils/parking";
 import { colors, radii, spacing } from "@/theme";
 
@@ -37,6 +46,13 @@ export default function ParkingScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [movingPin, setMovingPin] = useState(false);
+  const [startingNavigation, setStartingNavigation] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [routeMode, setRouteMode] = useState<RouteMode>("walking");
+  const isFocused = useRef(false);
+  const locationSubscription = useRef<Awaited<
+    ReturnType<typeof watchCurrentPosition>
+  > | null>(null);
 
   const refreshLocation = useCallback(async () => {
     setRefreshing(true);
@@ -57,6 +73,7 @@ export default function ParkingScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      isFocused.current = true;
       void service
         .getCurrent()
         .then((current) => {
@@ -70,11 +87,64 @@ export default function ParkingScreen() {
         });
       return () => {
         active = false;
+        isFocused.current = false;
+        locationSubscription.current?.remove();
+        locationSubscription.current = null;
+        setIsNavigating(false);
       };
     }, [service, refreshLocation]),
   );
 
+  const startNavigation = async () => {
+    if (!spot?.coordinates) return;
+
+    setStartingNavigation(true);
+    try {
+      const initialPosition = await getCurrentPosition();
+      if (!isFocused.current) return;
+      setCurrentLocation(initialPosition);
+      setLocationMessage(
+        `ตำแหน่งปัจจุบัน ${formatAccuracy(initialPosition.accuracy)}`,
+      );
+
+      const subscription = await watchCurrentPosition((position) => {
+        if (!isFocused.current) return;
+        setCurrentLocation(position);
+        setLocationMessage(
+          `ตำแหน่งปัจจุบัน ${formatAccuracy(position.accuracy)}`,
+        );
+      });
+      if (!isFocused.current) {
+        subscription.remove();
+        return;
+      }
+
+      locationSubscription.current?.remove();
+      locationSubscription.current = subscription;
+      setIsNavigating(true);
+    } catch {
+      Alert.alert(
+        "เริ่มนำทางไม่ได้",
+        "ตรวจสอบสิทธิ์ตำแหน่ง แล้วลองอีกครั้ง",
+      );
+    } finally {
+      setStartingNavigation(false);
+    }
+  };
+
+  const stopNavigation = () => {
+    locationSubscription.current?.remove();
+    locationSubscription.current = null;
+    setIsNavigating(false);
+  };
+
+  const toggleNavigation = () => {
+    if (isNavigating) stopNavigation();
+    else void startNavigation();
+  };
+
   const movePin = async () => {
+    stopNavigation();
     setMovingPin(true);
     try {
       const updated = await service.moveToCurrentPosition();
@@ -141,7 +211,9 @@ export default function ParkingScreen() {
           {spot.coordinates ? (
             <ParkingMap
               currentLocation={currentLocation}
+              isNavigating={isNavigating}
               parkingLocation={spot.coordinates}
+              routeMode={routeMode}
             />
           ) : (
             <View style={styles.noCoordinates}>
@@ -151,6 +223,16 @@ export default function ParkingScreen() {
               </Text>
             </View>
           )}
+          {spot.coordinates ? (
+            <RouteModeSelector value={routeMode} onChange={setRouteMode} />
+          ) : null}
+          {spot.coordinates ? (
+            <NavigationControl
+              isNavigating={isNavigating}
+              loading={startingNavigation}
+              onPress={toggleNavigation}
+            />
+          ) : null}
           {spot.coordinates ? (
             <View style={styles.locationRow}>
               <MaterialIcons
@@ -174,26 +256,26 @@ export default function ParkingScreen() {
             <Text style={styles.savedAtText}>
               บันทึก {formatSavedAt(spot.savedAt)}
             </Text>
-            {spot.coordinates ? (
-              <Text style={styles.savedAtText}>
-                GPS {spot.coordinates.latitude.toFixed(5)},{" "}
-                {spot.coordinates.longitude.toFixed(5)}
-              </Text>
-            ) : null}
           </View>
           {spot.coordinates ? (
-            <Button
-              variant="secondary"
-              icon="pin-drop"
-              loading={movingPin}
-              onPress={() => void movePin()}
-            >
-              ย้ายหมุดมาที่นี่
-            </Button>
+            <View style={styles.actions}>
+              <View style={styles.actionCell}>
+                <Button
+                  variant="secondary"
+                  icon="pin-drop"
+                  loading={movingPin}
+                  onPress={() => void movePin()}
+                >
+                  ย้ายหมุดมาที่นี่
+                </Button>
+              </View>
+              <View style={styles.actionCell}>
+                <Button variant="danger" icon="delete-outline" onPress={clearSpot}>
+                  ล้างจุดจอด
+                </Button>
+              </View>
+            </View>
           ) : null}
-          <Button variant="danger" icon="delete-outline" onPress={clearSpot}>
-            ล้างจุดจอด
-          </Button>
         </>
       )}
     </Screen>
@@ -233,7 +315,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   headingText: { gap: 2 },
   eyebrow: { color: "#6c9673", fontFamily: "Prompt_500Medium", fontSize: 11 },
@@ -242,7 +324,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    paddingHorizontal: spacing.sm,
+    minHeight: 38,
+    marginVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surfaceSoft,
   },
   locationText: {
     flex: 1,
@@ -263,10 +349,12 @@ const styles = StyleSheet.create({
     fontFamily: "Prompt_500Medium",
     fontSize: 13,
   },
-  savedAt: { gap: 3, paddingHorizontal: spacing.xs },
+  savedAt: { paddingHorizontal: spacing.xs, marginTop: spacing.xs },
   savedAtText: {
     color: colors.textSoft,
     fontFamily: "Prompt_400Regular",
     fontSize: 11,
   },
+  actions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.xs },
+  actionCell: { flex: 1 },
 });

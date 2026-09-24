@@ -5,13 +5,22 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { colors, radii, spacing } from "@/theme";
 
 export function ParkingHeader({ back = false }: { back?: boolean }) {
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace("/");
+  };
+
   return (
     <View style={styles.row}>
       {back ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="ย้อนกลับ"
-          onPress={() => router.back()}
+          onPress={handleBack}
           style={styles.back}
         >
           <MaterialIcons name="arrow-back" size={22} color={colors.primary} />
@@ -34,7 +43,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 9,
     minHeight: 48,
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   back: {
     width: 38,
